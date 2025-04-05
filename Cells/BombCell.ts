@@ -43,6 +43,6 @@ export class BombCell implements ICell
     {
         if (this.Revealed) return "B";
         if (this.Flagged) return "F";
-        return "□";
+        return " ";
     }
 }

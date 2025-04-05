@@ -5,6 +5,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "start": "node start.js",
     "clean": "rimraf dist"
   }
 }

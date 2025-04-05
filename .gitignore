@@ -4,17 +4,20 @@ node_modules/
 # Compiled output
 dist/
 
-# TypeScript artifacts
+# TypeScript build artifacts
 *.js
 *.js.map
 *.d.ts
 *.tsbuildinfo
 
+# But keep the start script for cross-platform launching
+!start.js
+
 # OS and editor cruft
 .DS_Store
 Thumbs.db
 
-# IDE config
+# IDE settings
 .vscode/
 .idea/
 
