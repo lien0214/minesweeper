@@ -47,7 +47,7 @@ export class NormalCell implements ICell
 
     public ToString(): string
     {
-        if (this.Revealed) this._bombs.toString();
+        if (this.Revealed) return this._bombs.toString();
         if (this.Flagged) return "F";
         return " ";
     }
