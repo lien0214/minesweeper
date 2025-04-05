@@ -1,5 +1,10 @@
 {
   "devDependencies": {
-    "@types/node": "^22.14.0"
+    "@types/node": "^22.14.0",
+    "rimraf": "^6.0.1"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf dist"
   }
 }
