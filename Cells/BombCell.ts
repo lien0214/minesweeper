@@ -4,24 +4,28 @@ import { ISignaler } from '../Interfaces/ISignaler';
 
 export class BombCell implements ICell
 {
-    _signaler: ISignaler;
-    _revealed = false;
-    _flagged = false;
-    _cellType = CellType.Bomb;
-    _position: [number, number];
+    private _signaler: ISignaler;
+    private _revealed = false;
+    private _flagged = false;
+    private _cellType = CellType.Bomb;
+    private _position: [number, number];
+    private _bombExplosion: () => void;
 
     public get Position(): [number, number] { return this._position; }
     public get CellType(): CellType { return this._cellType; }
     public get Revealed(): boolean { return this._revealed; }
     public get Flagged(): boolean { return this._flagged; }
 
-    public constructor(signaler: ISignaler, position: [number, number]) {
+    public constructor(signaler: ISignaler, position: [number, number], bombExplosion: () => void) {
         this._signaler = signaler;
         this._position = position;
+        this._bombExplosion = bombExplosion;
     }
 
     public Clicked(): void {
         if (this._revealed) return;
+        if (this._flagged) return;
+        this._bombExplosion();
         this._revealed = true;
         this._signaler.Signal(this);
     }

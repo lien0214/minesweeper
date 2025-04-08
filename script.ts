@@ -1,7 +1,7 @@
 import * as readline from 'readline';
 import { Game } from './Game';
 import { CellCommandType } from './Enums/CellCommandType';
-import { GameResultType } from './Enums/GameResultType';
+import { GameStatus } from './Enums/GameStatus';
 
 // Create game instance
 const game = new Game();
@@ -26,32 +26,38 @@ async function play() {
   while (true) {
     game.StartRound();
 
-    let type;
+    let type: CellCommandType;
     while (true) {
       const cmd = (await askQuestion("Command (click/flag): ")).toLowerCase();
       if (cmd === 'click') {
         type = CellCommandType.ClickCell;
         break;
-      }
-      else if (cmd === 'flag') {
+      } else if (cmd === 'flag') {
         type = CellCommandType.PlaceFlag;
         break;
+      } else {
+        console.log("Invalid command. Please enter 'click' or 'flag'.");
       }
-    } 
+    }
+
     const r = parseInt(await askQuestion("Row: "));
     const c = parseInt(await askQuestion("Col: "));
 
     game.CommandCell(r, c, type);
+    game.EndRound();
 
-    // You can add game-over checking here if you have a flag for it
-    const exit = await askQuestion("Continue? (y/n): ");
-    if (exit.toLowerCase() !== 'y') {
-      game.EndGame(GameResultType.Lose); // or Win if you check for it
+    // Check for game end
+    if (game.Status !== GameStatus.Default) {
       rl.close();
       break;
     }
 
-    game.EndRound();
+    const exit = await askQuestion("Continue? (y/n): ");
+    if (exit.toLowerCase() !== 'y') {
+      console.log("Game aborted.");
+      rl.close();
+      break;
+    }
   }
 }
 

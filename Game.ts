@@ -2,12 +2,16 @@ import { IBoard } from "./Interfaces/IBoard";
 import { IGame } from "./Interfaces/IGame";
 import { Board } from "./Board";
 import { CellCommandType } from "./Enums/CellCommandType";
-import { GameResultType } from "./Enums/GameResultType";
+import { GameStatus } from "./Enums/GameStatus";
+import { BoardStatus } from "./Enums/BoardStatus";
 
 export class Game implements IGame
 {
     private _board: IBoard;
     private _round: number = 0;
+    private _status: GameStatus = GameStatus.Default;
+
+    public get Status(): GameStatus { return this._status; }
 
     public constructor() {
         this._board = undefined as unknown as IBoard;
@@ -30,10 +34,16 @@ export class Game implements IGame
         console.log(this._board.Render());
     }
     EndRound(): void {
+        if (this._board.Status !== BoardStatus.Default) {
+            this._status = this._board.Status === BoardStatus.Win ? GameStatus.Win : GameStatus.Lose;
+            this.EndGame();
+            return;
+        }
         console.log("Ending round " + this._round);
         this._round++;
     }
-    EndGame(resultType: GameResultType): void {
-        console.log("Game Over! Result: " + GameResultType[resultType]);
+    private EndGame(): void {
+        console.log("Game Over! Result: " + GameStatus[this._status]);
+        console.log(this._board.Render());
     }
 }

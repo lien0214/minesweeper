@@ -1,40 +1,54 @@
 import { BombCell } from "./Cells/BombCell";
 import { NormalCell } from "./Cells/NormalCell";
+import { BoardStatus } from "./Enums/BoardStatus";
 import { IBoard } from "./Interfaces/IBoard";
+import { IBoardGenerator } from "./Interfaces/IBoardGenerator";
 import { ICell } from "./Interfaces/ICell";
 import { BombSignaler } from "./Signalers/BombSignaler";
 import { EmptySignaler } from "./Signalers/EmptySignaler";
 
-export class Board implements IBoard
+export class Board implements IBoard, IBoardGenerator
 {
     private _rows: number;
     private _columns: number;
     private _bombCount: number;
+    private _safeCells: number;
+    private _status: BoardStatus;
 
     private _cells: Array<Array<ICell>>;
-    private _bombMap: Array<Array<boolean>> = [];
-    private _bombs: BombCell[] = [];
 
     private EmptyCellSignaler: EmptySignaler = new EmptySignaler();
     private BombCellSignaler: BombSignaler = new BombSignaler();
 
+    private _safeCellDecrement: () => void = () => {
+        this._safeCells--;
+        if (this._safeCells === 0) {
+            this._status = BoardStatus.Win;
+        }
+    }
+    private _bombExplosion: () => void = () => { this._status = BoardStatus.Lose; };
+
+    public get Status(): BoardStatus { return this._status; }
+
     public constructor(rows: number, columns: number, bombCount: number) {
+        this._status = BoardStatus.Default;
         this._rows = rows;
         this._columns = columns;
         this._bombCount = bombCount;
+        this._safeCells = rows * columns - bombCount;
         this._cells = undefined as unknown as Array<Array<ICell>>;
     }
 
     public ClickCell(row: number, col: number): void {
         if (this._cells === undefined) {
-            this.GenerateBoard(this._rows, this._columns, this._bombCount, [row, col]);
+            this._cells = this.GenerateBoard(this._rows, this._columns, this._bombCount, [row, col]);
         }
         this._cells[row][col].Clicked();
     }
 
     public PlaceFlag(row: number, col: number): void {
         if (this._cells === undefined) {
-            this.GenerateBoard(this._rows, this._columns, this._bombCount, [row, col]);
+            this._cells = this.GenerateBoard(this._rows, this._columns, this._bombCount, [row, col]);
         }
         this._cells[row][col].PlaceFlag();
     }
@@ -70,17 +84,18 @@ export class Board implements IBoard
      * @param firstClick The position of the first click, used to avoid placing a bomb there.
      * @returns A 2D array of cells representing the board.
     */
-    private GenerateBoard(rows: number, columns: number, bombs: number, firstClick: [number, number]): void {
-        this._cells = new Array(rows);
-        this._bombMap = this.LocateBombs(rows, columns, bombs, firstClick);
+    public GenerateBoard(rows: number, columns: number, bombs: number, firstClick: [number, number]): Array<Array<ICell>> {
+        let cellMap: Array<Array<ICell>> = new Array(rows);
+        let bompMap = this.LocateBombs(rows, columns, bombs, firstClick);
+        let bombList: Array<BombCell> = new Array();
         for (let r = 0; r < rows; r++) {
-            this._cells[r] = new Array(columns);
+            cellMap[r] = new Array(columns);
             for (let c = 0; c < columns; c++) {
                 // If the cell itself is a bomb, create a BombCell
-                if (this._bombMap[r][c]) {
-                    let newBomb = new BombCell(this.BombCellSignaler, [r, c]);
-                    this._bombs.push(newBomb);
-                    this._cells[r][c] = newBomb;
+                if (bompMap[r][c]) {
+                    let newBomb = new BombCell(this.BombCellSignaler, [r, c], this._bombExplosion);
+                    bombList.push(newBomb);
+                    cellMap[r][c] = newBomb;
                 }
                 else {
                     // Otherwise, create a NormalCell with the number of adjacent bombs
@@ -88,17 +103,18 @@ export class Board implements IBoard
                     for (let x = -1; x <= 1; x++) {
                         for (let y = -1; y <= 1; y++) {
                             if (r + x < 0 || r + x >= rows || c + y < 0 || c + y >= columns) continue;
-                            if (this._bombMap[r + x][c + y]) neighbor_bomb_count++;
+                            if (bompMap[r + x][c + y]) neighbor_bomb_count++;
                         }
                     }
-                    this._cells[r][c] = new NormalCell(this.EmptyCellSignaler, neighbor_bomb_count, [r, c]);
+                    cellMap[r][c] = new NormalCell(this.EmptyCellSignaler, neighbor_bomb_count, [r, c], this._safeCellDecrement);
                 }
             }
         }
 
         // Set up the signalers
-        this.EmptyCellSignaler.SetCells(this._cells);
-        this.BombCellSignaler.SetBombs(this._bombs);
+        this.EmptyCellSignaler.SetCells(cellMap);
+        this.BombCellSignaler.SetBombs(bombList);
+        return cellMap;
     }
 
     /**
@@ -110,13 +126,13 @@ export class Board implements IBoard
      * @returns A 2D array of booleans representing the bomb locations on the board.
      *          `true` indicates a bomb, and `false` indicates no bomb.
     */
-    private LocateBombs(rows: number, columns: number, bombs: number, firstClick: [number, number]): Array<Array<boolean>> {
+    public LocateBombs(rows: number, columns: number, bombs: number, firstClick: [number, number]): Array<Array<boolean>> {
         const result: Array<Array<boolean>> = new Array(rows);
         for (let i = 0; i < rows; i++) {
             result[i] = new Array(columns).fill(false);
         }
         
-        // shuffle the indices
+        // shuffle the indices by using 
         const indices: Array<number> = Array.from({ length: rows * columns }, (_, i) => i);
         for (let i = indices.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
