@@ -1,11 +1,10 @@
 {
   "devDependencies": {
     "@types/node": "^22.14.0",
-    "rimraf": "^6.0.1"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   },
   "scripts": {
-    "build": "tsc",
-    "start": "node start.js",
-    "clean": "rimraf dist"
+    "start": "npx ts-node script.ts"
   }
 }
