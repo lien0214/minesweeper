@@ -1,9 +1,7 @@
 import { BombCell } from "./Cells/BombCell";
 import { NormalCell } from "./Cells/NormalCell";
-import { GameResultType } from "./Enums/GameResultType";
 import { IBoard } from "./Interfaces/IBoard";
 import { ICell } from "./Interfaces/ICell";
-import { IGame } from "./Interfaces/IGame";
 import { BombSignaler } from "./Signalers/BombSignaler";
 import { EmptySignaler } from "./Signalers/EmptySignaler";
 
@@ -41,24 +39,27 @@ export class Board implements IBoard
         this._cells[row][col].PlaceFlag();
     }
     
-    // Note: AI generated
+    // Note: AI generated for Console UI
     public Render(): string {
+        const cellWidth = 3;
         const colHeaders = [...Array(this._columns).keys()]
-            .map(c => `${c.toString().padStart(2)} `)
-            .join('');
-        
-        const topBorder = `   +${'---+'.repeat(this._columns)}\n`;
-        
+            .map(c => c.toString().padStart(cellWidth, ' '))
+            .join(' ');
+    
+        const horizontalBorder = `   +${'---+'.repeat(this._columns)}\n`;
+    
         const rows = [...Array(this._rows).keys()].map(r => {
             const rowCells = [...Array(this._columns).keys()].map(c => {
                 const cell = this._cells?.[r]?.[c]?.ToString?.() ?? ' ';
-                return ` ${cell} |`;
-            }).join('');
-            return `${r.toString().padStart(2)} |${rowCells}\n${topBorder}`;
+                return ` ${cell.toString().padEnd(1, ' ')} `;
+            }).map(cell => `|${cell}`).join('') + '|\n';
+    
+            return `${r.toString().padStart(2)} ${rowCells}${horizontalBorder}`;
         }).join('');
     
-        return `   ${colHeaders}\n${topBorder}${rows}`;
-    }    
+        return `   ${colHeaders}\n${horizontalBorder}${rows}`;
+    }
+    
 
     /**
      * Generates a board of cells with the specified number of rows, columns, and bombs.
