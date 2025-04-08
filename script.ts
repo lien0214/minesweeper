@@ -26,13 +26,20 @@ async function play() {
   while (true) {
     game.StartRound();
 
-    const cmd = await askQuestion("Command (click/flag): ");
+    let type;
+    while (true) {
+      const cmd = (await askQuestion("Command (click/flag): ")).toLowerCase();
+      if (cmd === 'click') {
+        type = CellCommandType.ClickCell;
+        break;
+      }
+      else if (cmd === 'flag') {
+        type = CellCommandType.PlaceFlag;
+        break;
+      }
+    } 
     const r = parseInt(await askQuestion("Row: "));
     const c = parseInt(await askQuestion("Col: "));
-
-    const type = cmd.toLowerCase() === 'click'
-      ? CellCommandType.ClickCell
-      : CellCommandType.PlaceFlag;
 
     game.CommandCell(r, c, type);
 

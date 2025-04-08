@@ -5,6 +5,7 @@ export interface ICell
     readonly Flagged: boolean;
     readonly Revealed: boolean;
     readonly CellType: CellType;
+    readonly Position: [number, number];
 
     Clicked(): void;
     PlaceFlag(): void;

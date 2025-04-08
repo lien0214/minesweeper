@@ -14,7 +14,7 @@ export class Game implements IGame
     }
 
     StartGame(row: number, col: number, bombCount: number): void {
-        this._board = new Board(row, col, bombCount, this);
+        this._board = new Board(row, col, bombCount);
     }
     StartRound(): void {
         console.log("Starting round " + this._round);

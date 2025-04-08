@@ -4,24 +4,27 @@ import { GameResultType } from "./Enums/GameResultType";
 import { IBoard } from "./Interfaces/IBoard";
 import { ICell } from "./Interfaces/ICell";
 import { IGame } from "./Interfaces/IGame";
+import { BombSignaler } from "./Signalers/BombSignaler";
+import { EmptySignaler } from "./Signalers/EmptySignaler";
 
 export class Board implements IBoard
 {
     private _rows: number;
     private _columns: number;
     private _bombCount: number;
-    private _game: IGame;
 
     private _cells: Array<Array<ICell>>;
-    private _cellMap: Map<ICell, [number, number]> = new Map<ICell, [number, number]>();
+    private _bombMap: Array<Array<boolean>> = [];
     private _bombs: BombCell[] = [];
 
-    public constructor(rows: number, columns: number, bombCount: number, game: IGame) {
+    private EmptyCellSignaler: EmptySignaler = new EmptySignaler();
+    private BombCellSignaler: BombSignaler = new BombSignaler();
+
+    public constructor(rows: number, columns: number, bombCount: number) {
         this._rows = rows;
         this._columns = columns;
         this._bombCount = bombCount;
         this._cells = undefined as unknown as Array<Array<ICell>>;
-        this._game = game;
     }
 
     public ClickCell(row: number, col: number): void {
@@ -37,63 +40,25 @@ export class Board implements IBoard
         }
         this._cells[row][col].PlaceFlag();
     }
-
-    public SignalBomb(): void {
-        for (const bomb of this._bombs) {
-            bomb.BombSignal();
-        }
-        this._game.EndGame(GameResultType.Lose);
-    }
-
-    public SignalEmpty(cell: ICell): void {
-        const [row, col] = this._cellMap.get(cell) || [-1, -1];
-        if (row === -1 || col === -1) {
-            throw new Error("Cell not found in cell map.");
-        }
-        for (let r = -1; r <= 1; r++) {
-            for (let c = -1; c <= 1; c++) {
-                const newRow = row + r;
-                const newCol = col + c;
-                if (newRow < 0 || newRow >= this._rows || newCol < 0 || newCol >= this._columns) continue;
-                const neighborCell = this._cells[newRow][newCol];
-                if (neighborCell.Revealed) continue;
-                neighborCell.EmptySignal();
-            }
-        }
-    }
-
+    
+    // Note: AI generated
     public Render(): string {
-        let result = "   "; // space for row labels
+        const colHeaders = [...Array(this._columns).keys()]
+            .map(c => `${c.toString().padStart(2)} `)
+            .join('');
+        
+        const topBorder = `   +${'---+'.repeat(this._columns)}\n`;
+        
+        const rows = [...Array(this._rows).keys()].map(r => {
+            const rowCells = [...Array(this._columns).keys()].map(c => {
+                const cell = this._cells?.[r]?.[c]?.ToString?.() ?? ' ';
+                return ` ${cell} |`;
+            }).join('');
+            return `${r.toString().padStart(2)} |${rowCells}\n${topBorder}`;
+        }).join('');
     
-        // Column numbers
-        for (let c = 0; c < this._columns; c++) {
-            result += ` ${c.toString().padStart(2)} `;
-        }
-        result += "\n";
-    
-        // Top border
-        result += "   +" + "---+".repeat(this._columns) + "\n";
-    
-        for (let r = 0; r < this._rows; r++) {
-            // Row number
-            result += r.toString().padStart(2) + " |";
-    
-            for (let c = 0; c < this._columns; c++) {
-                let cellContent = " ";
-                if (this._cells !== undefined) {
-                    cellContent = this._cells[r][c].ToString();
-                }
-                result += ` ${cellContent.padEnd(1)} |`;
-            }
-    
-            result += "\n";
-            result += "   +" + "---+".repeat(this._columns) + "\n";
-        }
-    
-        return result;
-    }
-    
-    
+        return `   ${colHeaders}\n${topBorder}${rows}`;
+    }    
 
     /**
      * Generates a board of cells with the specified number of rows, columns, and bombs.
@@ -106,13 +71,13 @@ export class Board implements IBoard
     */
     private GenerateBoard(rows: number, columns: number, bombs: number, firstClick: [number, number]): void {
         this._cells = new Array(rows);
-        const bombBoard: Array<Array<boolean>> = this.LocateBombs(rows, columns, bombs, firstClick);
+        this._bombMap = this.LocateBombs(rows, columns, bombs, firstClick);
         for (let r = 0; r < rows; r++) {
             this._cells[r] = new Array(columns);
             for (let c = 0; c < columns; c++) {
                 // If the cell itself is a bomb, create a BombCell
-                if (bombBoard[r][c]) {
-                    let newBomb = new BombCell(this);
+                if (this._bombMap[r][c]) {
+                    let newBomb = new BombCell(this.BombCellSignaler, [r, c]);
                     this._bombs.push(newBomb);
                     this._cells[r][c] = newBomb;
                 }
@@ -122,15 +87,17 @@ export class Board implements IBoard
                     for (let x = -1; x <= 1; x++) {
                         for (let y = -1; y <= 1; y++) {
                             if (r + x < 0 || r + x >= rows || c + y < 0 || c + y >= columns) continue;
-                            if (bombBoard[r + x][c + y]) neighbor_bomb_count++;
+                            if (this._bombMap[r + x][c + y]) neighbor_bomb_count++;
                         }
                     }
-                    this._cells[r][c] = new NormalCell(this, neighbor_bomb_count);
+                    this._cells[r][c] = new NormalCell(this.EmptyCellSignaler, neighbor_bomb_count, [r, c]);
                 }
-                
-                this._cellMap.set(this._cells[r][c], [r, c]);
             }
         }
+
+        // Set up the signalers
+        this.EmptyCellSignaler.SetCells(this._cells);
+        this.BombCellSignaler.SetBombs(this._bombs);
     }
 
     /**

@@ -1,27 +1,29 @@
 import { CellType } from '../Enums/CellType';
 import { ICell } from '..//Interfaces/ICell';
-import { IBoard } from '../Interfaces/IBoard';
+import { ISignaler } from '../Interfaces/ISignaler';
 
 export class BombCell implements ICell
 {
-    _signaler: IBoard;
+    _signaler: ISignaler;
     _revealed = false;
     _flagged = false;
     _cellType = CellType.Bomb;
+    _position: [number, number];
 
+    public get Position(): [number, number] { return this._position; }
     public get CellType(): CellType { return this._cellType; }
     public get Revealed(): boolean { return this._revealed; }
     public get Flagged(): boolean { return this._flagged; }
 
-    public constructor(signaler: IBoard)
-    {
+    public constructor(signaler: ISignaler, position: [number, number]) {
         this._signaler = signaler;
+        this._position = position;
     }
 
     public Clicked(): void {
         if (this._revealed) return;
         this._revealed = true;
-        this._signaler.SignalBomb();
+        this._signaler.Signal(this);
     }
 
     public PlaceFlag(): void {
