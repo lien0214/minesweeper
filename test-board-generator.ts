@@ -28,7 +28,7 @@ async function main() {
 
     // Create the board and generate the bomb map
     const board = new Board(rows, cols, bombs);
-    const bombMap = board.LocateBombs([rows, cols], bombs, firstClick);
+    const bombMap = board.LocateBombs(firstClick);
     console.log("Bomb Map:");
     printBooleanBoard(bombMap);
 }

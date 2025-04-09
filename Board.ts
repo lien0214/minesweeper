@@ -47,14 +47,14 @@ export class Board implements IBoard, IBoardGenerator
 
     public ClickCell(row: number, col: number): void {
         if (this._cells === undefined) {
-            this._cells = this.GenerateBoard([this._rows, this._columns], this._bombCount, [row, col]);
+            this._cells = this.GenerateBoard([this._rows, this._columns]);
         }
         this._cells[row][col].Clicked();
     }
 
     public PlaceFlag(row: number, col: number): void {
         if (this._cells === undefined) {
-            this._cells = this.GenerateBoard([this._rows, this._columns], this._bombCount, [row, col]);
+            this._cells = this.GenerateBoard([this._rows, this._columns]);
         }
         this._cells[row][col].PlaceFlag();
     }
@@ -80,14 +80,13 @@ export class Board implements IBoard, IBoardGenerator
         return `   ${colHeaders}\n${horizontalBorder}${rows}`;
     }
     
-    public GenerateBoard(size: [number, number], bombs: number, firstClick: [number, number]): Array<Array<ICell>> {
-        let [rows, columns] = size;
-        let cellMap: Array<Array<ICell>> = new Array(rows);
-        let bompMap = this.LocateBombs(size, bombs, firstClick);
+    public GenerateBoard(firstClick: [number, number]): Array<Array<ICell>> {
+        let cellMap: Array<Array<ICell>> = new Array(this._rows);
+        let bompMap = this.LocateBombs(firstClick);
         let bombList: Array<BombCell> = new Array();
-        for (let r = 0; r < rows; r++) {
-            cellMap[r] = new Array(columns);
-            for (let c = 0; c < columns; c++) {
+        for (let r = 0; r < this._rows; r++) {
+            cellMap[r] = new Array(this._columns);
+            for (let c = 0; c < this._columns; c++) {
                 // If the cell itself is a bomb, create a BombCell
                 if (bompMap[r][c]) {
                     let newBomb = new BombCell(this.BombCellSignaler, [r, c], this._bombExplosion);
@@ -99,7 +98,7 @@ export class Board implements IBoard, IBoardGenerator
                     let neighbor_bomb_count = 0;
                     for (let x = -1; x <= 1; x++) {
                         for (let y = -1; y <= 1; y++) {
-                            if (r + x < 0 || r + x >= rows || c + y < 0 || c + y >= columns) continue;
+                            if (r + x < 0 || r + x >= this._rows || c + y < 0 || c + y >= this._columns) continue;
                             if (bompMap[r + x][c + y]) neighbor_bomb_count++;
                         }
                     }
@@ -114,15 +113,14 @@ export class Board implements IBoard, IBoardGenerator
         return cellMap;
     }
 
-    public LocateBombs(size: [number, number], bombs: number, firstClick: [number, number]): Array<Array<boolean>> {
-        let [rows, columns] = size;
-        const result: Array<Array<boolean>> = new Array(rows);
-        for (let i = 0; i < rows; i++) {
-            result[i] = new Array(columns).fill(false);
+    public LocateBombs(firstClick: [number, number]): Array<Array<boolean>> {
+        const result: Array<Array<boolean>> = new Array(this._rows);
+        for (let i = 0; i < this._rows; i++) {
+            result[i] = new Array(this._columns).fill(false);
         }
         
         // shuffle the indices by using 
-        const indices: Array<number> = Array.from({ length: rows * columns }, (_, i) => i);
+        const indices: Array<number> = Array.from({ length: this._rows * this._columns }, (_, i) => i);
         for (let i = indices.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [indices[i], indices[j]] = [indices[j], indices[i]];
@@ -130,10 +128,10 @@ export class Board implements IBoard, IBoardGenerator
 
         // pick the first `bombs` indices
         // Ensure the first click is not a bomb
-        for (let i = 0, count = bombs; i < count; i++) {
+        for (let i = 0, count = this._bombCount; i < count; i++) {
             const index = indices[i];
-            const row = Math.floor(index / columns);
-            const col = index % columns;
+            const row = Math.floor(index / this._columns);
+            const col = index % this._columns;
             // Ensure the bomb is not placed on the first click
             if (row === firstClick[0] && col === firstClick[1]) {
                 count++;

@@ -12,7 +12,7 @@ export interface IBoardGenerator {
      * @param firstClick The first click on the board, usually used to avoid placing a bomb there.
      * @returns A 2D array of cell object representing the board.
      */
-    GenerateBoard(size: [number, number], bombs: number, firstClick: [number, number]): Array<Array<ICell>>;
+    GenerateBoard(firstClick: [number, number]): Array<Array<ICell>>;
     
     /**
      * Generates a 2D array of boolean values representing the locations of bombs on the board.
@@ -21,5 +21,5 @@ export interface IBoardGenerator {
      * @param firstClick The first click on the board, used to avoid placing a bomb there.
      * @returns A 2D array of booleans representing the bomb locations on the board.
      */
-    LocateBombs(size: [number, number], bombs: number, firstClick: [number, number]): Array<Array<boolean>>;
+    LocateBombs(firstClick: [number, number]): Array<Array<boolean>>;
 }
