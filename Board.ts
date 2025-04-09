@@ -31,6 +31,12 @@ export class Board implements IBoard, IBoardGenerator
     public get Status(): BoardStatus { return this._status; }
 
     public constructor(rows: number, columns: number, bombCount: number) {
+        if (rows <= 0 || columns <= 0) {
+            throw new Error("Rows and columns must be greater than zero.");
+        }
+        if (bombCount < 0 || bombCount >= rows * columns) {
+            throw new Error("Bomb count must be between 0 and rows * columns.");
+        }
         this._status = BoardStatus.Default;
         this._rows = rows;
         this._columns = columns;
