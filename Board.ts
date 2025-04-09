@@ -1,5 +1,6 @@
 import { BombCell } from "./Cells/BombCell";
 import { NormalCell } from "./Cells/NormalCell";
+import { UndefinedCell } from "./Cells/UndefinedCell";
 import { BoardStatus } from "./Enums/BoardStatus";
 import { IBoard } from "./Interfaces/IBoard";
 import { IBoardGenerator } from "./Interfaces/IBoardGenerator";
@@ -42,7 +43,17 @@ export class Board implements IBoard, IBoardGenerator
         this._columns = columns;
         this._bombCount = bombCount;
         this._safeCells = rows * columns - bombCount;
-        this._cells = undefined as unknown as Array<Array<ICell>>;
+        // set cells to undefined cells to start
+        this._cells = new Array(rows);
+        for (let i = 0; i < rows; i++) {
+            this._cells[i] = new Array(columns);
+            for (let j = 0; j < columns; j++) {
+                this._cells[i][j] = new UndefinedCell([i, j], (firstClick: [number, number]) => {
+                    this._cells = this.GenerateBoard(firstClick);
+                    this._cells[i][j].Clicked();
+                })
+            }
+        }
     }
 
     public ClickCell(row: number, col: number): void {
