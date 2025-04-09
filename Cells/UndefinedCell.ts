@@ -1,4 +1,3 @@
-import { CellType } from "../Enums/CellType";
 import { ICell } from "../Interfaces/ICell";
 
 export class UndefinedCell implements ICell {
@@ -8,7 +7,6 @@ export class UndefinedCell implements ICell {
 
     public get Revealed(): boolean { return false; }
     public get Flagged(): boolean { return this._flagged; }
-    public get CellType(): CellType { return CellType.Undefined; }
     public get Position(): [number, number] { return [-1, -1]; }
 
     constructor(position: [number, number], GenerateBoard: (firstClick: [number, number]) => void) {

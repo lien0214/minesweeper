@@ -51,13 +51,6 @@ async function play() {
       rl.close();
       break;
     }
-
-    const exit = await askQuestion("Continue? (y/n): ");
-    if (exit.toLowerCase() !== 'y') {
-      console.log("Game aborted.");
-      rl.close();
-      break;
-    }
   }
 }
 

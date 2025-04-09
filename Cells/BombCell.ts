@@ -1,4 +1,3 @@
-import { CellType } from '../Enums/CellType';
 import { ICell } from '..//Interfaces/ICell';
 import { ISignaler } from '../Interfaces/ISignaler';
 
@@ -7,12 +6,10 @@ export class BombCell implements ICell
     private _signaler: ISignaler;
     private _revealed = false;
     private _flagged = false;
-    private _cellType = CellType.Bomb;
     private _position: [number, number];
     private _bombExplosion: () => void;
 
     public get Position(): [number, number] { return this._position; }
-    public get CellType(): CellType { return this._cellType; }
     public get Revealed(): boolean { return this._revealed; }
     public get Flagged(): boolean { return this._flagged; }
 
