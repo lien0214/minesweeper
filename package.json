@@ -5,6 +5,7 @@
     "typescript": "^5.8.3"
   },
   "scripts": {
-    "start": "npx ts-node run-game.ts"
+    "start": "npx ts-node run-game.ts",
+    "test-board-generator": "npx ts-node test-board-generator.ts"
   }
 }
