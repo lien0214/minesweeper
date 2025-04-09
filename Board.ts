@@ -41,14 +41,14 @@ export class Board implements IBoard, IBoardGenerator
 
     public ClickCell(row: number, col: number): void {
         if (this._cells === undefined) {
-            this._cells = this.GenerateBoard(this._rows, this._columns, this._bombCount, [row, col]);
+            this._cells = this.GenerateBoard([this._rows, this._columns], this._bombCount, [row, col]);
         }
         this._cells[row][col].Clicked();
     }
 
     public PlaceFlag(row: number, col: number): void {
         if (this._cells === undefined) {
-            this._cells = this.GenerateBoard(this._rows, this._columns, this._bombCount, [row, col]);
+            this._cells = this.GenerateBoard([this._rows, this._columns], this._bombCount, [row, col]);
         }
         this._cells[row][col].PlaceFlag();
     }
@@ -74,19 +74,10 @@ export class Board implements IBoard, IBoardGenerator
         return `   ${colHeaders}\n${horizontalBorder}${rows}`;
     }
     
-
-    /**
-     * Generates a board of cells with the specified number of rows, columns, and bombs.
-     * The first click position is used to ensure that the first cell clicked is not a bomb.
-     * @param rows The number of rows in the board.
-     * @param columns The number of columns in the board.
-     * @param bombs The number of the bombs to place on the board.
-     * @param firstClick The position of the first click, used to avoid placing a bomb there.
-     * @returns A 2D array of cells representing the board.
-    */
-    public GenerateBoard(rows: number, columns: number, bombs: number, firstClick: [number, number]): Array<Array<ICell>> {
+    public GenerateBoard(size: [number, number], bombs: number, firstClick: [number, number]): Array<Array<ICell>> {
+        let [rows, columns] = size;
         let cellMap: Array<Array<ICell>> = new Array(rows);
-        let bompMap = this.LocateBombs(rows, columns, bombs, firstClick);
+        let bompMap = this.LocateBombs(size, bombs, firstClick);
         let bombList: Array<BombCell> = new Array();
         for (let r = 0; r < rows; r++) {
             cellMap[r] = new Array(columns);
@@ -117,16 +108,8 @@ export class Board implements IBoard, IBoardGenerator
         return cellMap;
     }
 
-    /**
-     * Randomly locates bombs on the board, ensuring that the first click position is not a bomb.
-     * @param rows The number of rows in the board.
-     * @param columns The number of columns in the board.
-     * @param bombs The number of the bombs to place on the board.
-     * @param firstClick The position of the first click, used to avoid placing a bomb there.
-     * @returns A 2D array of booleans representing the bomb locations on the board.
-     *          `true` indicates a bomb, and `false` indicates no bomb.
-    */
-    public LocateBombs(rows: number, columns: number, bombs: number, firstClick: [number, number]): Array<Array<boolean>> {
+    public LocateBombs(size: [number, number], bombs: number, firstClick: [number, number]): Array<Array<boolean>> {
+        let [rows, columns] = size;
         const result: Array<Array<boolean>> = new Array(rows);
         for (let i = 0; i < rows; i++) {
             result[i] = new Array(columns).fill(false);
