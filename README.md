@@ -17,8 +17,8 @@ Interface IBoardGenerator {
     LocateBombs(firstClickPosition: [row, col]): Array<Array<boolean>>
 }
 
-Class Board implements IBoardGenerator {
-    constructor(rows, cols, bombCount) { ... }
+Class BoardGenerator implements IBoardGenerator {
+    constructor(rows, cols, bombCount, /* some optional callbacks */) { ... }
     // rest of implementation
 }
 ```
@@ -35,7 +35,7 @@ To fit the requirement, I design the class `Board` as the pseudo above, where:
 
 #### Bomb Generation
 
-The spec requires that first click cannot be the bomb. To ensure this, the bombs will be locate right after the first click.
+The spec requires that first click cannot be the bomb. To ensure this, the bombs will be located right after the first click.
 
 The bomb location is decided by the first `bombCount` number with the random sequence in a size of `rows * columns`
 
@@ -59,6 +59,18 @@ Interface IGame {
 
 Game is just designed for state seperating and setting the function that has to be run in every state, not very important. This part I did not implement error handling, supposing the user calls the method in the right sequence.
 
+#### Board
+
+```typescript
+Interface IBoard {
+    readonly Status // indicate the board status is default(in progress), win or lose
+    ClickCell(row: number, col: number): void;
+    PlaceFlag(row: number, col: number): void;
+    Render(): string; // Probably can return Array<Array<string>> to be more useful
+}
+```
+
+IBoard is the interface for user to interact with board.
 
 #### Cells
 
