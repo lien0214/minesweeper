@@ -1,5 +1,6 @@
 import * as readline from 'readline';
 import { Board } from './Board';
+import { BoardGenerator } from './BoardGenerator';
 
 function printBooleanBoard(board: Array<Array<boolean>>): void {
     board.forEach(row => {
@@ -27,8 +28,8 @@ async function main() {
     rl.close();
 
     // Create the board and generate the bomb map
-    const board = new Board(rows, cols, bombs);
-    const bombMap = board.LocateBombs(firstClick);
+    const boardGenerator = new BoardGenerator(rows, cols, bombs);
+    const bombMap = boardGenerator.LocateBombs(firstClick);
     console.log("Bomb Map:");
     printBooleanBoard(bombMap);
 }
