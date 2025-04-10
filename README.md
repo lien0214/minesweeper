@@ -13,8 +13,8 @@ The project is develop under npm 22.14.0, please make sure you have the npm vers
 
 ```typescript
 Interface IBoardGenerator {
-    GenerateBoard(firstClickPosition: [row, col]): Array<<ICell>>
-    LocateBombs(firstClickPosition: [row, col]): Array<<boolean>>
+    GenerateBoard(firstClickPosition: [row, col]): Array<Array<ICell>>
+    LocateBombs(firstClickPosition: [row, col]): Array<Array<boolean>>
 }
 
 Class Board implements IBoardGenerator {
